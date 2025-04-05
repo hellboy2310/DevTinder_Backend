@@ -2,26 +2,25 @@ const express = require('express');
 
 const app = express();
 
-// app.use('/test', (req, res) => {
-//     res.send('hello from test server');
-// })
+const { adminAuth, userAuth } = require('./middlewares/auth');
 
-// app.use('/hello', (req, res) => {
-//     res.send('hello from a normal user');
-// })
 
-app.get('/user', (req, res) => {
+app.use("/admin", adminAuth);
+
+app.use("/user", userAuth, (req, res) => {
     res.send({
-        firstName: 'bhavesh',
-        lastName: 'purohit'
+        message: 'welcome user'
     })
 })
 
-app.post('/user', (req, res) => {
-    res.send({
-        message: `data saved successfully`
-    })
+app.get('/admin/details', (req, res) => {
+    res.send('details fetched succesfully');
 })
+
+app.get('/admin/deleteUser', (req, res) => {
+    res.send("User deleted Successfully");
+})
+
 
 app.listen(3000, () => {
     console.log('server is runnnign at this port');
