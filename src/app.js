@@ -44,21 +44,64 @@ app.post("/signup", async (req, res) => {
 
 //get user using findOne
 
+// app.get("/user", async (req, res) => {
+//     const email = req.body.email;
+//     try {
+//         const userDetails = await User.findOne({email: email});
+//         if(userDetails.length === 0){
+//             res.status(400).send("User not found");
+//         }
+//         else{
+//             res.send(userDetails);I
+//         }
+//     }
+//     catch (err) {
+//         res.status(400).send("error finding the details", err.message);
+//     }
+// })
+
+
+//get user by userid
 app.get("/user", async (req, res) => {
-    const email = req.body.email;
+    const id = req.body.id;
     try {
-        const userDetails = await User.findOne({email: email});
-        if(userDetails.length === 0){
+        const userDetail = await User.findById({ _id: id }).exec();
+        if (userDetail.length === 0) {
             res.status(400).send("User not found");
         }
-        else{
-            res.send(userDetails);I
+        else {
+            res.send(userDetail);
         }
     }
     catch (err) {
-        res.status(400).send("error finding the details", err.message);
+        res.status(400).send('error finding the details');
     }
 })
+
+app.put("/user/:id", async (req, res) => {
+    const id = req.params.id;
+    console.log(id, 'id aau chu')
+    const options = req.body;
+    try {
+        const updatedUserDetail = await User.findByIdAndUpdate(id, options, { new: true });
+        res.status(200).send({ updatedUserDetail });
+    }
+    catch (err) {
+        res.status(400).send('Failed to update user', err.message);
+    }
+})
+
+app.delete("/user/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const deleteUser = await User.findByIdAndDelete(id);
+        res.status(200).send(deleteUser)
+    }
+    catch (err) {
+        res.status(400).send(`failed to delete user`);
+    }
+})
+
 
 //get all user which are there in the documents
 app.get("/feed", async (req, res) => {
