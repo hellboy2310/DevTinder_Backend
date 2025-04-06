@@ -21,6 +21,56 @@ app.post("/signup", async (req, res) => {
 
 })
 
+//get one user using emailId
+// app.get("/user", async (req, res) => {
+//     const email = req.body.email;
+//     console.log(email, 'email coming');
+
+//     try {
+//         const userDetails = await User.find({ email: email });
+//         if (userDetails.length === 0) {
+//             res.status(404).send('User not found')
+//         }
+//         else {
+//             res.send(userDetails)
+
+//         }
+//     }
+//     catch (err) {
+//         res.status(400).send("error finding the details", err.message)
+//     }
+// })
+
+
+//get user using findOne
+
+app.get("/user", async (req, res) => {
+    const email = req.body.email;
+    try {
+        const userDetails = await User.findOne({email: email});
+        if(userDetails.length === 0){
+            res.status(400).send("User not found");
+        }
+        else{
+            res.send(userDetails);I
+        }
+    }
+    catch (err) {
+        res.status(400).send("error finding the details", err.message);
+    }
+})
+
+//get all user which are there in the documents
+app.get("/feed", async (req, res) => {
+    try {
+        const allUser = await User.find({});
+        res.send(allUser);
+    }
+    catch (err) {
+        res.status(400).send("Users not found", err.message);
+    }
+})
+
 connectDb().then(() => {
     console.log('Database Connection Successfull!!');
     app.listen(3000, () => {
