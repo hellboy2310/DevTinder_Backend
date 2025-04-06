@@ -51,7 +51,13 @@ const userSchema = new mongoose.Schema({
         default: 'This is a default description'
     },
     skills: {
-        type: [String]
+        type: [String],
+        validate: {
+            validator: function (v) {
+                return v.length >= 2 && v.length <= 6;
+            },
+            message: 'Skills array must have between 2 and 6 items.'
+        }
     }
 }, { timestamps: true })
 

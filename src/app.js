@@ -16,7 +16,7 @@ app.post("/signup", async (req, res) => {
         res.send("User added successfully")
     }
     catch (err) {
-        res.status(400).send("Error saving the user", err.message);
+        res.status(400).send("Error saving the user" + err.message);
     }
 
 })
@@ -78,16 +78,26 @@ app.get("/user", async (req, res) => {
     }
 })
 
+
 app.put("/user/:id", async (req, res) => {
     const id = req.params.id;
     console.log(id, 'id aau chu')
     const options = req.body;
+
+
     try {
+        
+        const ALLOWED_UPDATES = ["photoUrl", "about", "gender", 'age', 'skills'];
+        const isupdateAllowed = Object.keys(options).every((k) => ALLOWED_UPDATES.includes(k));
+        console.log(isupdateAllowed,'ahiua')
+        if (!isupdateAllowed) {
+            throw new Error('update not allowed')
+        }
         const updatedUserDetail = await User.findByIdAndUpdate(id, options, { new: true, runValidators: true });
         res.status(200).send({ updatedUserDetail });
     }
     catch (err) {
-        res.status(400).send('Failed to update user', err.message);
+        res.status(400).send('Failed to update user  '+  err.message);
     }
 })
 
