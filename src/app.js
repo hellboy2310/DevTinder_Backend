@@ -83,7 +83,7 @@ app.put("/user/:id", async (req, res) => {
     console.log(id, 'id aau chu')
     const options = req.body;
     try {
-        const updatedUserDetail = await User.findByIdAndUpdate(id, options, { new: true });
+        const updatedUserDetail = await User.findByIdAndUpdate(id, options, { new: true, runValidators: true });
         res.status(200).send({ updatedUserDetail });
     }
     catch (err) {
