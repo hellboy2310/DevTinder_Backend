@@ -11,6 +11,7 @@ app.use(cookieParser());
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
 
 
 app.post("/signup", async (req, res) => {
@@ -116,21 +117,18 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.get("/profile", async (req, res) => {
-    const { cookie } = req.cookies;
-    console.log(cookie, 'cookie arrived');
-
-    if (!cookie) {
-        throw new Error("Invalid token");
-    }
-
-    const decodedMessage = await jwt.verify(cookie, 'Hellboy008');
-    const { _id } = decodedMessage;
-
-    const userDetail = await User.findById({ _id: _id }).exec();
+app.get("/profile", userAuth, async (req, res) => {
+    const user = req.user;
 
     res.send({
-        message: userDetail
+        message: user
+    })
+})
+
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+    const userName = req.user;
+    res.send({
+        message: userName.firstName + "send you a follow request"
     })
 })
 
