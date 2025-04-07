@@ -72,6 +72,25 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = jwt.sign({ _id: user._id }, "Hellboy008", {
+        expiresIn: '7d'
+    });
+
+    return token;
+
+}
+
+userSchema.methods.comparePassword = async function(passwordInputByUser) {
+    const user = this;
+    const isPasswordvalid = bcrypt.compare(passwordInputByUser, user.password);
+    if(!isPasswordvalid){
+        throw new Error("Invalid Password")
+    }
+    return isPasswordvalid;
+}
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

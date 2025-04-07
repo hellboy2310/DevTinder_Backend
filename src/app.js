@@ -103,12 +103,12 @@ app.post("/login", async (req, res) => {
             return res.status(404).json({ message: "No user found with this email." });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.isPasswordvalid(password);
 
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid password." });
         }
-        const token = jwt.sign({ _id: user._id }, "Hellboy008")
+        const token = await user.getJWT();
         res.cookie('cookie', token);
         res.status(200).json({ message: "Welcome User!" });
     } catch (err) {
