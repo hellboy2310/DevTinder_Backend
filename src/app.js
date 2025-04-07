@@ -2,12 +2,15 @@ const express = require('express');
 const { connectDb } = require('./config/db')
 const app = express();
 const User = require("./models/user");
+const cookieParser = require("cookie-parser");
 
 app.use(express.json()); // to handle JSON
 app.use(express.urlencoded({ extended: true })); // to handle form data
-const { validateSignUpData } = require('./utils/validation')
+const { validateSignUpData } = require('./utils/validation');
+app.use(cookieParser());
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 app.post("/signup", async (req, res) => {
@@ -91,27 +94,46 @@ app.post("/signup", async (req, res) => {
 //login api
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
-  
+
     try {
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ message: "No user found with this email." });
-      }
-  
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-  
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid password." });
-      }
-  
-      res.status(200).json({ message: "Welcome User!" });
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "No user found with this email." });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Invalid password." });
+        }
+        const token = jwt.sign({ _id: user._id }, "Hellboy008")
+        res.cookie('cookie', token);
+        res.status(200).json({ message: "Welcome User!" });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Something went wrong.", error: err.message });
+        console.error(err);
+        res.status(500).json({ message: "Something went wrong.", error: err.message });
     }
-  });
-  
+});
+
+app.get("/profile", async (req, res) => {
+    const { cookie } = req.cookies;
+    console.log(cookie, 'cookie arrived');
+
+    if (!cookie) {
+        throw new Error("Invalid token");
+    }
+
+    const decodedMessage = await jwt.verify(cookie, 'Hellboy008');
+    const { _id } = decodedMessage;
+
+    const userDetail = await User.findById({ _id: _id }).exec();
+
+    res.send({
+        message: userDetail
+    })
+})
+
 
 
 //get user by userid
