@@ -5,13 +5,41 @@ const User = require("./models/user");
 
 app.use(express.json()); // to handle JSON
 app.use(express.urlencoded({ extended: true })); // to handle form data
+const { validateSignUpData } = require('./utils/validation')
+
+const bcrypt = require('bcrypt');
 
 
 app.post("/signup", async (req, res) => {
 
     //creating a new instance of user model
-    const user = new User(req.body)
     try {
+        validateSignUpData(req);
+        const {
+            firstName,
+            lastName,
+            email,
+            password,
+            age,
+            gender,
+            skills,
+            photoUrl,
+            about
+        } = req.body;
+
+        const passwordHash = await bcrypt.hash(password, 10);
+        const user = new User({
+            firstName,
+            lastName,
+            email,
+            password: passwordHash,
+            age,
+            gender,
+            skills,
+            photoUrl,
+            about
+        })
+
         await user.save();
         res.send("User added successfully")
     }
@@ -60,6 +88,31 @@ app.post("/signup", async (req, res) => {
 //     }
 // })
 
+//login api
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        return res.status(404).json({ message: "No user found with this email." });
+      }
+  
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid password." });
+      }
+  
+      res.status(200).json({ message: "Welcome User!" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Something went wrong.", error: err.message });
+    }
+  });
+  
+
 
 //get user by userid
 app.get("/user", async (req, res) => {
@@ -86,10 +139,10 @@ app.put("/user/:id", async (req, res) => {
 
 
     try {
-        
+
         const ALLOWED_UPDATES = ["photoUrl", "about", "gender", 'age', 'skills'];
         const isupdateAllowed = Object.keys(options).every((k) => ALLOWED_UPDATES.includes(k));
-        console.log(isupdateAllowed,'ahiua')
+        console.log(isupdateAllowed, 'ahiua')
         if (!isupdateAllowed) {
             throw new Error('update not allowed')
         }
@@ -97,7 +150,7 @@ app.put("/user/:id", async (req, res) => {
         res.status(200).send({ updatedUserDetail });
     }
     catch (err) {
-        res.status(400).send('Failed to update user  '+  err.message);
+        res.status(400).send('Failed to update user  ' + err.message);
     }
 })
 
