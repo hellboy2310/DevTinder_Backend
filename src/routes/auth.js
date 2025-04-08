@@ -3,7 +3,8 @@ const authRouter = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const { validateSignUpData } = require("../utils/validation");
-
+const { userAuth } = require("../middlewares/auth")
+const jwt = require("jsonwebtoken")
 
 
 authRouter.post("/signup", async (req, res) => {
@@ -74,6 +75,30 @@ authRouter.post("/logout", (req, res) => {
         expires: new Date(Date.now())
     })
     res.send("User logged out Successfully");
-})
+});
+
+authRouter.post("/forgot", userAuth, async (req, res) => {
+    try {
+        const { password } = req.body;
+        const loggedInUser = req.user;
+        const currentPassword = loggedInUser.password;
+
+        // Check if the new password is same as the current one
+        const isSamePassword = await bcrypt.compare(password, currentPassword);
+        if (isSamePassword) {
+            return res.status(400).send("New password cannot be the same as the old password");
+        }
+
+        // Hash the new password and save it
+        const passwordHash = await bcrypt.hash(password, 10);
+        loggedInUser.password = passwordHash;
+        await loggedInUser.save();
+
+        res.send("Password updated successfully");
+    } catch (err) {
+        res.status(400).send("Unable to change password: " + err.message);
+    }
+});
+
 
 module.exports = authRouter;
