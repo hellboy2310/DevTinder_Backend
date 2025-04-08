@@ -19,8 +19,12 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 
         //checking if this user even exists in DB
         const toUserIdExists = await User.findById(toUserId);
-        
-        if (!toUserIdExists) {
+
+        if (toUserId === fromUserId) {
+            throw new Error("You cannot request yourself");
+        }
+
+        if (!toUserIdExists && ) {
             throw new Error("User does not Exists");
         }
 
