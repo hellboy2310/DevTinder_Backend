@@ -24,7 +24,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
             throw new Error("You cannot request yourself");
         }
 
-        if (!toUserIdExists && ) {
+        if (!toUserIdExists) {
             throw new Error("User does not Exists");
         }
 
@@ -47,7 +47,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         const data = await connectionRequest.save();
 
         res.json({
-            message: "Connection Request send",
+            message: status,
             data
         })
     }
