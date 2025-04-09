@@ -26,7 +26,7 @@ const userAuth = async (req, res, next) => {
         const { _id } = decodedMessage;
 
         //find user of this id
-        const user = await User.findById({ _id: _id }).exec();
+        const user = await User.findById(_id).exec();
         if (!user) {
             throw new Error('User not found');
         }
@@ -35,7 +35,8 @@ const userAuth = async (req, res, next) => {
 
     }
     catch (err) {
-        res.status(400).send("Err" + err.message);
+        // res.status(400).send("Err" + err.message);
+        next(err)
     }
 
 }
