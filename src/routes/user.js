@@ -11,7 +11,8 @@ userRouter.get('/user/request/received', userAuth, async (req, res) => {
             toUserId: loggedInUser._id,
             status: 'interested'
 
-        }).populate("fromUserId", ["firstName", "lastName"]);
+        }).populate("fromUserId", ["firstName", "lastName"])
+            .populate("toUserId", ["firstName", "lastName"]);
 
         res.send({
             message: 'Requests fetched successfully',
@@ -34,8 +35,16 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
                 { fromUserId: loggedInUser._id }
             ],
             status: 'accepted'
-        }).populate("fromUserId", ['firstName']);
-        const fetchData = connectionRequest.map((item)=>item.fromUserId);
+        }).populate("fromUserId", ['firstName',"lastName"]);
+        const fetchData = connectionRequest.map((item) => {
+            if (item.fromUserId.toString() === loggedInUser._id.toString()) {
+                return item.fromUserId
+            }
+            else {
+                return item.toUserId
+            }
+        }
+        );
 
         res.send({
             message: 'Requests Fetched Successfully',
