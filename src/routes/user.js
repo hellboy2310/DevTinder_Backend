@@ -24,4 +24,28 @@ userRouter.get('/user/request/received', userAuth, async (req, res) => {
 
 })
 
+userRouter.get('/user/connections', userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+
+        const connectionRequest = await ConnectionRequestModel.find({
+            $or: [
+                { toUserId: loggedInUser._id },
+                { fromUserId: loggedInUser._id }
+            ],
+            status: 'accepted'
+        }).populate("fromUserId", ['firstName']);
+        const fetchData = connectionRequest.map((item)=>item.fromUserId);
+
+        res.send({
+            message: 'Requests Fetched Successfully',
+            data: fetchData
+        })
+
+    }
+    catch (err) {
+        res.status(400).send("Failed To Fetched Requests");
+    }
+})
+
 module.exports = userRouter;
