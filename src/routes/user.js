@@ -64,6 +64,9 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
 userRouter.get('/user/feed', userAuth, async (req, res) => {
     try {
         const loggedInuser = req.user;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
         //firstly trying to find all the connections request 
         const connectionRequest = await ConnectionRequestModel.find({
@@ -91,7 +94,7 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
                 }
 
             ]
-        }).select(USER_SAFE_DATA);
+        }).select(USER_SAFE_DATA).skip(skip).limit(limit);
 
         console.log(users, 'users');
 
